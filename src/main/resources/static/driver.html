@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Roadmate | Driver dashboard</title>
+    <style>
+        :root { --ink: #172b24; --muted: #6b786f; --line: #dce2da; --green: #194e3d; --green-dark: #113b2e; --amber: #dfa94c; --paper: #f4f3ed; }
+        * { box-sizing: border-box; }
+        body { min-height: 100vh; margin: 0; color: var(--ink); background: var(--paper); font-family: "Trebuchet MS", "Segoe UI", sans-serif; }
+        .hero { position: relative; min-height: 300px; color: #fff; background: #203d30 url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2000&q=85") center 57% / cover; }
+        .hero::before { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(17, 42, 31, .88), rgba(17, 42, 31, .54) 53%, rgba(17, 42, 31, .12)), linear-gradient(0deg, rgba(17, 42, 31, .34), transparent 60%); content: ""; }
+        .topbar, .hero-copy { position: relative; z-index: 1; width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
+        .topbar { display: flex; min-height: 76px; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, .24); }
+        .brand { display: inline-flex; align-items: center; gap: 10px; color: #fff; font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-decoration: none; text-transform: uppercase; }
+        .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid rgba(255, 255, 255, .7); border-radius: 50%; color: var(--amber); font-family: Georgia, serif; font-size: 18px; }
+        .account { display: flex; align-items: center; gap: 16px; margin: 0; color: rgba(255, 255, 255, .83); font-size: 12px; }
+        .account strong { color: #fff; }
+        a.logout { color: #fff; font-weight: 700; text-decoration-color: var(--amber); text-underline-offset: 4px; }
+        .hero-copy { padding: 36px 0 62px; }
+        .eyebrow { margin: 0 0 10px; color: var(--amber); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+        h1 { max-width: 630px; margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(38px, 5vw, 58px); font-weight: 400; line-height: 1.05; }
+        .hero-copy p:last-child { margin: 12px 0 0; color: rgba(255, 255, 255, .82); font-size: 14px; }
+        .dashboard { display: grid; grid-template-columns: minmax(310px, .8fr) minmax(0, 1.2fr); gap: 38px; width: min(1160px, calc(100% - 48px)); margin: 0 auto; padding: 36px 0 60px; }
+        .section { min-width: 0; padding: 0 0 28px; }
+        .section + .section { border-top: 1px solid var(--line); padding-top: 27px; }
+        .section-heading { display: flex; align-items: flex-start; gap: 13px; margin-bottom: 20px; }
+        .section-number { display: grid; width: 29px; height: 29px; flex: 0 0 29px; place-items: center; border-radius: 50%; background: #e9e5d8; color: var(--green); font-size: 11px; font-weight: 700; }
+        h2 { margin: 1px 0 0; color: var(--ink); font-family: Georgia, "Times New Roman", serif; font-size: 23px; font-weight: 400; }
+        .section-intro { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+        .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 13px; }
+        .field { display: block; min-width: 0; margin: 0 0 13px; color: #43574b; font-size: 11px; font-weight: 700; }
+        input, select { display: block; width: 100%; min-height: 43px; margin-top: 6px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 4px; background: #fff; color: var(--ink); font: inherit; font-size: 13px; }
+        input:focus, select:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(25, 78, 61, .11); }
+        button { min-height: 40px; padding: 9px 13px; border: 0; border-radius: 4px; background: var(--green); color: #fff; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; transition: background .18s, transform .18s; }
+        button:hover { background: var(--green-dark); transform: translateY(-1px); }
+        .section > button { width: 100%; margin-top: 2px; }
+        .list-section { grid-column: 2; grid-row: 1 / span 2; }
+        #myRidesList, #requestsList { color: var(--muted); font-size: 13px; }
+        .card { margin: 12px 0 0; padding: 17px; border: 1px solid var(--line); border-left: 4px solid var(--amber); border-radius: 5px; background: #fff; color: #43574b; font-size: 13px; line-height: 1.85; box-shadow: 0 5px 16px rgba(30, 47, 37, .04); }
+        .card strong { color: var(--ink); }
+        .card button { margin-top: 10px; }
+        .request-card { border-left-color: var(--amber); }
+        .approved { border-left-color: #4e8965; }
+        .rejected { border-left-color: #c05a48; }
+        .card hr { border: 0 !important; border-top: 1px solid var(--line) !important; }
+        @media (max-width: 760px) { .hero { min-height: 270px; } .dashboard { grid-template-columns: 1fr; gap: 0; } .list-section { grid-column: auto; grid-row: auto; } .dashboard > .section { border-top: 1px solid var(--line); padding-top: 25px; } }
+        @media (max-width: 520px) { .topbar, .hero-copy, .dashboard { width: calc(100% - 32px); } .topbar { min-height: 66px; } .account { gap: 9px; font-size: 11px; } .hero-copy { padding: 38px 0 45px; } h1 { font-size: 40px; } .dashboard { padding-top: 27px; } .field-grid { grid-template-columns: 1fr; gap: 0; } }
+    </style>
+</head>
+<body>
+
+<header class="hero">
+    <nav class="topbar">
+        <a class="brand" href="index.html"><span class="brand-mark">R</span> Roadmate</a>
+        <p class="account">Driver <strong id="displayDriverId">Loading...</strong><a class="logout" href="index.html">Log out</a></p>
+    </nav>
+    <div class="hero-copy">
+        <p class="eyebrow">Driver workspace</p>
+        <h1>Make room for the road.</h1>
+        <p>Plan your trip, share the seats, and keep every mile moving.</p>
+    </div>
+</header>
+
+<main class="dashboard">
+    <section class="section publish-section">
+        <div class="section-heading"><span class="section-number">01</span><div><h2>Publish a ride</h2><p class="section-intro">Set the details for your next trip.</p></div></div>
+        <div class="field-grid">
+            <label class="field">Starting point<input type="text" id="origin" placeholder="e.g. Coimbatore"></label>
+            <label class="field">Destination<input type="text" id="destination" placeholder="e.g. Pollachi"></label>
+            <label class="field">Departure<input type="datetime-local" id="departureTime"></label>
+            <label class="field">Available seats<input type="number" id="totalSeats" placeholder="Number of seats"></label>
+            <label class="field">Fare per seat<input type="number" id="fare" placeholder="Amount in ₹"></label>
+        </div>
+        <button onclick="publishRide()">Publish ride</button>
+    </section>
+
+    <section class="section list-section">
+        <div class="section-heading"><span class="section-number">02</span><div><h2>Your published rides</h2><p class="section-intro">Edit details or remove a trip.</p></div></div>
+        <div id="myRidesList">Loading your rides...</div>
+    </section>
+
+    <section class="section requests-section">
+        <div class="section-heading"><span class="section-number">03</span><div><h2>Ride requests</h2><p class="section-intro">Review the people joining your journey.</p></div></div>
+        <div id="requestsList">Loading requests...</div>
+    </section>
+</main>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const driverId = urlParams.get('userId');
+
+    if (driverId) {
+        document.getElementById('displayDriverId').innerText = driverId;
+        loadDriverRides();
+        loadDriverRequests();
+    } else {
+        document.getElementById('displayDriverId').innerText = "Not Set (Please Login)";
+    }
+
+    async function publishRide() {
+        if (!driverId) { alert("Driver ID missing!"); return; }
+
+        const rideData = {
+            origin: document.getElementById('origin').value,
+            destination: document.getElementById('destination').value,
+            departureTime: document.getElementById('departureTime').value,
+            totalSeats: parseInt(document.getElementById('totalSeats').value),
+            availableSeats: parseInt(document.getElementById('totalSeats').value),
+            fare: parseFloat(document.getElementById('fare').value)
+        };
+
+        const response = await fetch(`/api/carpool/rides?driverId=${driverId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(rideData)
+        });
+
+        if (response.ok) {
+            alert('Ride published successfully!');
+            document.getElementById('origin').value = '';
+            document.getElementById('destination').value = '';
+            document.getElementById('departureTime').value = '';
+            document.getElementById('totalSeats').value = '';
+            document.getElementById('fare').value = '';
+            loadDriverRides();
+        } else {
+            alert('Failed to publish ride.');
+        }
+    }
+
+    async function loadDriverRides() {
+        try {
+            const response = await fetch(`/api/carpool/drivers/${driverId}/rides`);
+            const rides = await response.json();
+            const listDiv = document.getElementById('myRidesList');
+            listDiv.innerHTML = '';
+
+            if (!rides || rides.length === 0) {
+                listDiv.innerHTML = '<p>You have not published any rides yet.</p>';
+                return;
+            }
+
+            rides.forEach(ride => {
+                listDiv.innerHTML += `
+                    <div class="card" id="ride-row-${ride.id}">
+                        <div id="ride-view-${ride.id}">
+                            <strong>Route:</strong> ${ride.origin} ➔ ${ride.destination}<br>
+                            <strong>Departure:</strong> ${ride.departureTime.replace('T', ' ')}<br>
+                            <strong>Seats:</strong> ${ride.availableSeats} / ${ride.totalSeats} | <strong>Fare:</strong> ₹${ride.fare}<br>
+                            <button style="background: #ffc107; color: black; width: 48%; display: inline-block; margin-right: 2%;" onclick="enableEdit(${ride.id})">Edit</button>
+                            <button style="background: #dc3545; color: white; width: 48%; display: inline-block;" onclick="deleteRide(${ride.id})">Delete</button>
+                        </div>
+                        <div id="ride-edit-${ride.id}" style="display:none; margin-top: 10px;">
+                            <input type="text" id="edit-origin-${ride.id}" value="${ride.origin}">
+                            <input type="text" id="edit-destination-${ride.id}" value="${ride.destination}">
+                            <input type="datetime-local" id="edit-departure-${ride.id}" value="${ride.departureTime}">
+                            <input type="number" id="edit-seats-${ride.id}" value="${ride.totalSeats}">
+                            <input type="number" id="edit-fare-${ride.id}" value="${ride.fare}">
+                            <button style="background: #28a745; width: 48%; display: inline-block; margin-right: 2%;" onclick="saveRide(${ride.id}, ${ride.availableSeats})">Save</button>
+                            <button style="background: #6c757d; width: 48%; display: inline-block;" onclick="cancelEdit(${ride.id})">Cancel</button>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (e) {
+            console.error("Error loading rides:", e);
+        }
+    }
+
+    function enableEdit(id) {
+        document.getElementById(`ride-view-${id}`).style.display = 'none';
+        document.getElementById(`ride-edit-${id}`).style.display = 'block';
+    }
+
+    function cancelEdit(id) {
+        document.getElementById(`ride-view-${id}`).style.display = 'block';
+        document.getElementById(`ride-edit-${id}`).style.display = 'none';
+    }
+
+    async function saveRide(rideId, currentAvailableSeats) {
+        const updatedData = {
+            origin: document.getElementById(`edit-origin-${rideId}`).value,
+            destination: document.getElementById(`edit-destination-${rideId}`).value,
+            departureTime: document.getElementById(`edit-departure-${rideId}`).value,
+            totalSeats: parseInt(document.getElementById(`edit-seats-${rideId}`).value),
+            availableSeats: currentAvailableSeats,
+            fare: parseFloat(document.getElementById(`edit-fare-${rideId}`).value)
+        };
+
+        const response = await fetch(`/api/carpool/rides/${rideId}?driverId=${encodeURIComponent(driverId)}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedData)
+        });
+
+        if (response.ok) {
+            alert('Ride updated successfully!');
+            loadDriverRides();
+        } else {
+            alert('Failed to update ride.');
+        }
+    }
+
+    async function deleteRide(rideId) {
+        if (!confirm("Are you sure you want to delete this ride?")) return;
+
+        const response = await fetch(`/api/carpool/rides/${rideId}?driverId=${encodeURIComponent(driverId)}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('Ride deleted successfully!');
+            loadDriverRides();
+        } else {
+            const error = await response.json().catch(() => ({}));
+            alert(error.message || 'Failed to delete ride.');
+        }
+    }
+
+    async function loadDriverRequests() {
+        try {
+            const response = await fetch(`/api/carpool/drivers/${driverId}/requests`);
+            const requests = await response.json();
+            const listDiv = document.getElementById('requestsList');
+            listDiv.innerHTML = '';
+
+            if (!requests || requests.length === 0) {
+                listDiv.innerHTML = '<p>No ride requests received yet.</p>';
+                return;
+            }
+
+            requests.forEach(req => {
+                let statusClass = '';
+                if (req.status === 'APPROVED') statusClass = 'approved';
+                if (req.status === 'REJECTED') statusClass = 'rejected';
+
+                let actionButtons = '';
+                if (req.status === 'PENDING') {
+                    actionButtons = `
+                        <button style="background: #28a745; width: 48%; display: inline-block; margin-right: 2%;" onclick="updateStatus(${req.id}, 'APPROVED')">Approve</button>
+                        <button style="background: #dc3545; width: 48%; display: inline-block;" onclick="updateStatus(${req.id}, 'REJECTED')">Reject</button>
+                    `;
+                } else {
+                    actionButtons = `<p><strong>Status:</strong> ${req.status}</p>`;
+                }
+
+                listDiv.innerHTML += `
+                    <div class="card request-card ${statusClass}">
+                        <strong>Rider Name:</strong> ${req.rider.name}<br>
+                        <strong>Rider Phone:</strong> ${req.rider.phoneNumber}<br>
+                        <strong>Route:</strong> ${req.ride.origin} ➔ ${req.ride.destination}<br>
+                        <strong>Current Status:</strong> ${req.status}<br>
+                        <hr style="margin: 8px 0; border:0; border-top:1px solid #ccc;">
+                        ${actionButtons}
+                    </div>
+                `;
+            });
+        } catch (e) {
+            console.error("Error loading requests:", e);
+            document.getElementById('requestsList').innerHTML = '<p>Failed to load requests.</p>';
+        }
+    }
+
+    async function updateStatus(requestId, status) {
+        const response = `/api/carpool/requests/${requestId}/status?status=${status}`;
+        const res = await fetch(response, { method: 'PUT' });
+        if (res.ok) {
+            alert(`Request status updated to ${status}`);
+            loadDriverRequests();
+        } else {
+            alert('Failed to update request status.');
+        }
+    }
+</script>
+
+</body>
+</html>

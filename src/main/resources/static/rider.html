@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadmate | Find a ride</title>
+    <style>
+        :root { --ink: #172b24; --muted: #6b786f; --line: #dce2da; --green: #194e3d; --green-dark: #113b2e; --amber: #dfa94c; --paper: #f4f3ed; }
+        * { box-sizing: border-box; }
+        body { min-height: 100vh; margin: 0; color: var(--ink); background: var(--paper); font-family: "Trebuchet MS", "Segoe UI", sans-serif; }
+        .hero { position: relative; min-height: 300px; color: #fff; background: #203d30 url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2000&q=85") center 57% / cover; }
+        .hero::before { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(17, 42, 31, .88), rgba(17, 42, 31, .54) 53%, rgba(17, 42, 31, .12)), linear-gradient(0deg, rgba(17, 42, 31, .34), transparent 60%); content: ""; }
+        .topbar, .hero-copy { position: relative; z-index: 1; width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
+        .topbar { display: flex; min-height: 76px; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, .24); }
+        .brand { display: inline-flex; align-items: center; gap: 10px; color: #fff; font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-decoration: none; text-transform: uppercase; }
+        .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid rgba(255, 255, 255, .7); border-radius: 50%; color: var(--amber); font-family: Georgia, serif; font-size: 18px; }
+        .account { display: flex; align-items: center; gap: 16px; margin: 0; color: rgba(255, 255, 255, .83); font-size: 12px; }
+        .account strong { color: #fff; }
+        a.logout { color: #fff; font-weight: 700; text-decoration-color: var(--amber); text-underline-offset: 4px; }
+        .hero-copy { padding: 36px 0 62px; }
+        .eyebrow { margin: 0 0 10px; color: var(--amber); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+        h1 { max-width: 630px; margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(38px, 5vw, 58px); font-weight: 400; line-height: 1.05; }
+        .hero-copy p:last-child { margin: 12px 0 0; color: rgba(255, 255, 255, .82); font-size: 14px; }
+        .content { width: min(1000px, calc(100% - 48px)); margin: 0 auto; padding: 36px 0 60px; }
+        .search-section { display: grid; grid-template-columns: minmax(230px, .7fr) 1.3fr; align-items: end; gap: 30px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+        h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 25px; font-weight: 400; }
+        .section-intro { margin: 7px 0 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+        .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 13px; }
+        .field { display: block; min-width: 0; margin: 0; color: #43574b; font-size: 11px; font-weight: 700; }
+        input { display: block; width: 100%; min-height: 44px; margin-top: 6px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 4px; background: #fff; color: var(--ink); font: inherit; font-size: 13px; }
+        input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(25, 78, 61, .11); }
+        button { min-height: 42px; padding: 10px 15px; border: 0; border-radius: 4px; background: var(--green); color: white; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; transition: background .18s, transform .18s; }
+        button:hover { background: var(--green-dark); transform: translateY(-1px); }
+        .search-section > button { grid-column: 2; width: 100%; margin-top: 12px; }
+        #results { padding-top: 2px; }
+        #results > h4 { margin: 24px 0 12px; font-size: 14px; }
+        .ride-card { margin-top: 12px; padding: 18px; border: 1px solid var(--line); border-left: 4px solid var(--amber); border-radius: 5px; background: #fff; color: #43574b; font-size: 13px; line-height: 1.9; box-shadow: 0 5px 16px rgba(30, 47, 37, .04); }
+        .ride-card strong { color: var(--ink); }
+        .ride-card hr { border: 0 !important; border-top: 1px solid var(--line) !important; }
+        .ride-card button { margin-top: 9px; }
+        @media (max-width: 700px) { .hero { min-height: 270px; } .search-section { grid-template-columns: 1fr; gap: 20px; } .search-section > button { grid-column: 1; margin-top: 0; } }
+        @media (max-width: 520px) { .topbar, .hero-copy, .content { width: calc(100% - 32px); } .topbar { min-height: 66px; } .account { gap: 9px; font-size: 11px; } .hero-copy { padding: 38px 0 45px; } h1 { font-size: 40px; } .content { padding-top: 27px; } .field-grid { grid-template-columns: 1fr; gap: 12px; } }
+    </style>
+</head>
+<body>
+
+<header class="hero">
+    <nav class="topbar">
+        <a class="brand" href="index.html"><span class="brand-mark">R</span> Roadmate</a>
+        <p class="account">Rider <strong id="displayRiderId">Loading...</strong><a class="logout" href="index.html">Log out</a></p>
+    </nav>
+    <div class="hero-copy">
+        <p class="eyebrow">Your next stop</p>
+        <h1>Find your way together.</h1>
+        <p>Choose a route and discover rides headed in your direction.</p>
+    </div>
+</header>
+
+<main class="content">
+    <section class="search-section">
+        <div><h2>Where are you headed?</h2><p class="section-intro">Start with the two places that shape your journey.</p></div>
+        <div class="field-grid">
+            <label class="field">Starting point<input type="text" id="searchOrigin" placeholder="e.g. Pollachi"></label>
+            <label class="field">Destination<input type="text" id="searchDestination" placeholder="e.g. Kinathukadavu"></label>
+        </div>
+        <button onclick="searchRides()">Search available rides</button>
+    </section>
+    <div id="results"></div>
+</main>
+
+<script>
+    // Extract riderId properly from URL query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const riderId = urlParams.get('userId');
+    
+    if (riderId) {
+        document.getElementById('displayRiderId').innerText = riderId;
+    } else {
+        document.getElementById('displayRiderId').innerText = "Not Set (Please Login)";
+    }
+
+    async function searchRides() {
+        const origin = document.getElementById('searchOrigin').value.trim();
+        const destination = document.getElementById('searchDestination').value.trim();
+
+        if (!origin || !destination) {
+            alert("Please enter both origin and destination!");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/carpool/rides/search?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`);
+            const data = await response.json();
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h4>Matching Rides & Driver Details:</h4>';
+
+            const rides = data.content ? data.content : data;
+
+            if (!rides || rides.length === 0) {
+                resultsDiv.innerHTML += '<p>No matching rides found.</p>';
+                return;
+            }
+
+            rides.forEach(ride => {
+                const driverName = ride.driver ? ride.driver.name : 'Unknown Driver';
+                const driverPhone = ride.driver ? ride.driver.phoneNumber : '';
+                const departure = ride.departureTime ? ride.departureTime.replace('T', ' ') : '';
+
+                resultsDiv.innerHTML += `
+                    <div class="ride-card">
+                        <strong>Route:</strong> ${ride.origin} ➔ ${ride.destination}<br>
+                        <strong>Departure:</strong> ${departure}<br>
+                        <strong>Available Seats:</strong> ${ride.availableSeats} / ${ride.totalSeats}<br>
+                        <hr style="margin: 8px 0; border:0; border-top:1px solid #ccc;">
+                        <strong>Driver Name:</strong> ${driverName}<br>
+                        <strong>Driver Phone:</strong> ${driverPhone}<br>
+                        <button style="width: auto; padding: 6px 12px; margin-top: 8px; background: #28a745;" 
+                            onclick="requestSeat(${ride.id}, '${driverPhone}', '${ride.origin}', '${ride.destination}', '${driverName}')">
+                            Request Seat via WhatsApp
+                        </button>
+                    </div>
+                `;
+            });
+        } catch (error) {
+            console.error("Error fetching rides:", error);
+            alert("Failed to fetch rides. Check backend connection.");
+        }
+    }
+
+    async function requestSeat(rideId, driverPhone, origin, destination, driverName) {
+        if (!riderId) { 
+            alert("Rider ID missing! Please login again from index.html"); 
+            return; 
+        }
+
+        try {
+            const response = await fetch(`/api/carpool/rides/${rideId}/request/${riderId}`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                const message = `Hi ${driverName}, I would like to request a seat for your ride from ${origin} to ${destination}. Please approve! 🚗`;
+                const encodedMessage = encodeURIComponent(message);
+                const whatsappUrl = `https://wa.me/${driverPhone}?text=${encodedMessage}`;
+                window.open(whatsappUrl, '_blank');
+            } else {
+                const err = await response.json();
+                alert('Error: ' + (err.message || 'Failed to request seat'));
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Network error while requesting seat.");
+        }
+    }
+</script>
+
+</body>
+</html>
